@@ -3,13 +3,13 @@
 {% block content %}
     {% for post in posts %}
         <div class="post">
-            <div class="date">
-                <p>Опубликовано: {{ post.published_date }}</p>
-            </div>
+            <p class="date">created: {{ post.created_date|date:'d-m-Y' }}</p>
             <h1><a href="{% url 'post_detaill' pkey=post.pk %}">{{ post.title }}</a></h1>
-            <p>{{ post.text|linebreaksbr }}</p>
+            <p>{{ post.text|truncatechars:200 }}</p>
         </div>
     {% endfor %}
-    <a class="btn btn-default" href="{% url 'post_draft_list'%}">Post Draft List</a>
+
+    <a class="btn btn-default" href="{% url 'post_list' %}">Home</a>
     <a class="btn btn-default" href="/admin">Admin</a>
+
 {% endblock %}

@@ -8,37 +8,53 @@ from .forms import PostForm
 def post_list(request):
 	posts = Post.objects.filter(
 		published_date__lte=timezone.now()
-		).order_by('published_date')
+		).order_by('created_date') # ).order_by('published_date')
 
 	return render(request, 'blog/post_list.html', {'posts':posts})
 
-def post_detail(request, pkey): # мы должны использовать то же имя переменной, что мы выбрали для обработки URL (pk)
+def post_detail(request, pkey): # мы должны использовать то же имя переменной, что мы выбрали для обработки URL (pkey)
 	post = get_object_or_404(Post, pk=pkey)
 	return render(request, 'blog/post_detail.html', {'post': post} )
 
 def post_new(request):
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published_date = timezone.now()
-            post.save()
-            return redirect('post_detaill', pkey=post.pk)
-    else:
-        form = PostForm()
-    return render(request, 'blog/post_edit.html', {'form': form})
+	if request.method == "POST":
+		form = PostForm(request.POST)
+		if form.is_valid():
+			post = form.save(commit=False)
+			post.author = request.user
+			#post.published_date = timezone.now()
+			post.save()
+			return redirect('post_detaill', pkey=post.pk)
+	else:
+		form = PostForm()
+	return render(request, 'blog/post_edit.html', {'form': form})
 
 def post_edit(request, pkey):
-    post = get_object_or_404(Post, pk=pkey)
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published_date = timezone.now()
-            post.save()
-            return redirect('post_detaill', pkey=post.pk)
-    else:
-        form = PostForm(instance=post)
-    return render(request, 'blog/post_edit.html', {'form': form})
+	post = get_object_or_404(Post, pk=pkey)
+	if request.method == "POST":
+		form = PostForm(request.POST, instance=post)
+		if form.is_valid():
+			post = form.save(commit=False)
+			post.author = request.user
+			#post.published_date = timezone.now()
+			post.save()
+			return redirect('post_detaill', pkey=post.pk)
+	else:
+		form = PostForm(instance=post)
+	return render(request, 'blog/post_edit.html', {'form': form})
+
+def post_draft_list(request):
+	posts = Post.objects.filter(
+		published_date__isnull=True
+		).order_by('created_date')
+	return render(request, 'blog/post_draft_list.html', {'posts': posts})
+
+def post_publish(request, pk):
+	post = get_object_or_404(Post, pk=pk)
+	post.publish()
+	return redirect('post_detaill', pkey=pk)
+
+def post_remove(request, pkey):
+	post=get_object_or_404(Post, pk=pkey)
+	post.delete()
+	return redirect('post_list')
