@@ -15,6 +15,37 @@
         {% endif %}
         <h1>{{ post.title }}</h1>
         <p>{{ post.text|linebreaksbr }}</p>
-        <a class="btn btn-default" href="{% url 'post_list'%}">Home</a>
+        {% if post.published_date %}
+        	<a class="btn btn-default" href="{% url 'post_list'%}">Home</a>
+        {% else %}
+        	<a class="btn btn-default" href="{% url 'post_draft_list'%}">Post Draft List</a>
+        {% endif %}
+
     </div>
-{% endblock %}
+
+	<hr>
+	<a class="btn btn-default" href="{% url 'add_comment_to_post' pkey=post.pk %}">Add comment</a>
+	{% for comment in post.comments.all %}
+    	{% if user.is_authenticated or comment.approved_comment %}
+    		<div class="comment">
+    		    <div class="date">
+    		        {{ comment.created_date }}
+    		        {% if not comment.approved_comment %}
+    		            <a class="btn btn-default" href="{% url 'comment_approve' pk=comment.pk %}"><span class="glyphicon glyphicon-ok"></span></a>
+    		        {% endif %}
+    		        <a class="btn btn-default" href="{% url 'comment_remove' pkey=comment.pk %}"><span class="glyphicon glyphicon-remove"></span></a>
+        		</div>
+        	{% if comment.approved_comment %}
+        		<strong>{{ comment.text|linebreaks }}</strong>
+        		<u>{{ comment.author }}</u>
+        	{% else %}
+        		<p>{{ comment.text|linebreaks }}</p>
+        		<u>{{ comment.author }}</u>
+        	{% endif %}
+    		</div>
+    	{% endif %}
+	{% empty %}
+	    <p>No comments here yet :(</p>
+	{% endfor %}
+	
+	{% endblock %}
